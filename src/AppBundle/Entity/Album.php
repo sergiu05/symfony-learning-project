@@ -112,7 +112,7 @@ class Album
     }
 
     /**
-     * Set price
+     * Set price in cents
      *
      * @param integer $price
      *
@@ -120,19 +120,19 @@ class Album
      */
     public function setPrice($price)
     {
-        $this->price = $price;
+        $this->price = $price * 100;
 
         return $this;
     }
 
     /**
-     * Get price
+     * Get price in dollar
      *
      * @return int
      */
     public function getPrice()
     {
-        return $this->price;
+        return round($this->price/100, 2);
     }
 
     /**

@@ -10,4 +10,20 @@ namespace AppBundle\Repository;
  */
 class AlbumRepository extends \Doctrine\ORM\EntityRepository
 {
+	public function getAlbumsFor($genre) {
+		
+		$query = $this->getEntityManager()
+					->createQuery(
+						'SELECT a, g FROM AppBundle:Album a
+						JOIN a.genre g 
+						WHERE g.name = :name
+						'
+					)->setParameter('name', $genre);
+
+		try {
+			return $query->getResult();
+		} catch (\Doctrine\ORM\NoResultException $e) {
+			return null;
+		}
+	}
 }

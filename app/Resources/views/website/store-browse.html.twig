@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Musical genres' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	{% stylesheets 
+		'@AppBundle/Resources/public/css/1-col-portfolio.css' 		
+	%}
+	<link rel="stylesheet" href="{{ asset_url }}">
+	{% endstylesheets %}
+{% endblock %}	
+
+{% block body_class 'genres' %}
+
+{% block body %}
+
+<div class="container">	
+
+	<div class="row">
+		<div class="col-lg-12">
+			<h1>Music Genders
+				<small>Check out our new releases</small>
+			</h1>
+		</div>
+	</div>
+
+	{% for genre in genres %}
+	<div class="row">
+		<div class="col-md-7">
+			<a href="{{ url('browse_genre', {'genre': genre.name}) }}">				
+				<img class="img-responsive" src="{{ asset('bundles/app/images/') ~ genre.image }}" alt="">				
+			</a>
+		</div>
+		<div class="col-md-5">
+			<h3>{{ genre.name|capitalize }}</h3>
+			<p>{{ genre.description|nl2br }}</p>
+			<a class="btn btn-primary" href="{{ url('browse_genre', {'genre': genre.name}) }}">View Albums <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+		</div>
+	</div>
+
+	<hr>
+	{% else %}
+	<div class="row">
+		<div class="col-md-12">
+			<p>Currently, no music genders defined.</p>
+		</div>
+	</div>
+	{% endfor %}
+
+</div>
+
+
+{% endblock %}

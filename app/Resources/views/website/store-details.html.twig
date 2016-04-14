@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Album Details' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	{% stylesheets 
+		'@AppBundle/Resources/public/css/shop-item.css' 		
+	%}
+	<link rel="stylesheet" href="{{ asset_url }}">
+	{% endstylesheets %}
+{% endblock %}	
+
+{% block body_class 'album-details' %}
+
+{% block body %}
+
+<div class="container">
+
+<div class="row">
+
+   <div class="col-md-3">
+        <p class="lead">CDs Music</p>
+        <div class="list-group">            
+            {% for genre in genres %}
+            <a href="{{ path('browse_genre', {'genre': genre.name}) }}" class="list-group-item {% if (album.genre.id == genre.id) %} active {% endif %}">{{ genre.name }}</a>
+            {% endfor %}            
+        </div>
+    </div>
+
+    <div class="col-md-5">
+
+        <div class="thumbnail">
+            <img class="img-responsive" src="{{ asset('bundles/app/images/' ~ album.image) }}" alt="">
+            <div class="caption-full">
+                <h4 class="pull-right">${{ album.price }}</h4>
+                <h4><a href="{{ path('album_details', {'album_id': album.id}) }}">{{ album.title }}</a>
+                </h4>                
+                <p>{{ album.description }}</p>
+            </div>
+            <div class="ratings">
+                <p class="pull-right">3 reviews</p>
+                <p>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                    4.0 stars
+                </p>
+            </div>
+            <div class="button-wrapper">
+                <button id="addToCart" type="button" class="btn primary">
+                    Add To Cart
+                </button>
+            </div>
+        </div>
+
+    </div>
+    
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme form with ['bootstrap_3_layout.html.twig', 'form/fields.html.twig'] %}
+
+{% block title 'Register' %}
+
+{% block form_errors -%}
+    {% if errors|length > 0 -%}
+    {% if form.parent %}<span class="help-block">{% else %}<div class="alert alert-danger">{% endif %}
+    <ul class="list-unstyled">
+        {%- for error in errors -%}
+            <li><i class="fa fa-exclamation" aria-hidden="true"></i>{{ error.message }}</li>
+        {%- endfor -%}
+    </ul>
+    {% if form.parent %}</span>{% else %}</div>{% endif %}
+    {%- endif %}
+{%- endblock form_errors %}	
+
+{% block stylesheets %}
+	{{ parent() }}	
+	<style>
+	body {
+    	padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+	}
+	</style>
+{% endblock %}
+
+{% block body_class 'register-page' %}
+
+
+
+{% block body %}
+
+<div class="container">	
+	{{ knp_menu_render('AppBundle:Builder:mainMenu') }}
+	<div class="row">
+		<div class="col-sm-8">
+			{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    			{{ form_row(form.username) }}
+    			{{ form_row(form.email) }}
+    			{{ form_row(form.plainPassword.first) }}
+    			{{ form_row(form.plainPassword.second) }}
+    			<button type="submit" class="btn btn-info">Register!</button>
+			{{ form_end(form) }}
+		</div>
+	</div>
+</div>
+
+{% endblock %}

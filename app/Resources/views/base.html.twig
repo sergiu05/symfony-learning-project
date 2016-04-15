@@ -33,6 +33,9 @@
 	              			<li class="active"><a href="#">Home</a></li>
 	              			<li><a href="#">About</a></li>
 	              			<li><a href="#">Contact</a></li>
+	              			{% if is_granted('ROLE_ADMIN') %}
+	              				<li><a href="/admin">Admin</a></li>
+	              			{% endif %}
 	              			<li class="dropdown">
 	                			<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
 	                			<ul class="dropdown-menu">
@@ -47,9 +50,12 @@
 	              			</li>
 	            		</ul>
 	            		<ul class="nav navbar-nav navbar-right">
-	              			<li class="active"><a href="./">Default <span class="sr-only">(current)</span></a></li>
-	              			<li><a href="../navbar-static-top/">Static top</a></li>
-	              			<li><a href="../navbar-fixed-top/">Fixed top</a></li>
+	            			{% if app.user %}
+	            				<li><a href="{{ path('security_logout') }}">Logout</a></li>
+	            			{% else %}
+	            				<li><a href="{{ path('security_login_form') }}">Login</a></li>
+	              				<li><a href="{{ path('user_registration') }}">Register</a></li>
+	            			{% endif %}	              			
 	            		</ul>
           			</div><!--/.nav-collapse -->
         		</div><!--/.container-fluid -->

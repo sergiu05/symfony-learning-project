@@ -4,15 +4,18 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * User
  *
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
- * @ORM\HasLifecycleCallbacks
+ * @ORM\HasLifecycleCallbacks()
  */
-class User
+class User implements UserInterface, \Serializable
 {
     /**
      * @var int
@@ -27,13 +30,16 @@ class User
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
+     * @Assert\NotBlank()
      */
-    private $name;
+    private $username;
 
     /**
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private $email;
 
@@ -45,11 +51,23 @@ class User
     private $isAdmin;
 
     /**
+     *
+     * @Assert\NotBlank()
+     * @Assert\Length(max=4096)
+     */
+    private $plainPassword;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="password", type="string", length=255)
      */
     private $password;
+
+    /**
+     * @ORM\Column(name="is_active", type="boolean")
+     */
+    private $isActive;
 
     /**
      * @var \DateTime
@@ -73,6 +91,8 @@ class User
 
     public function __construct() {
     	$this->orders = new ArrayCollection();
+    	$this->isActive = true;
+    	$this->isAdmin = false;
     }
  
     /**
@@ -92,9 +112,9 @@ class User
      *
      * @return User
      */
-    public function setName($name)
+    public function setUsername($username)
     {
-        $this->name = $name;
+        $this->username = $username;
 
         return $this;
     }
@@ -104,9 +124,24 @@ class User
      *
      * @return string
      */
-    public function getName()
+    public function getUsername()
     {
-        return $this->name;
+        return $this->username;
+    }
+
+    public function getSalt() {
+    	return null;
+    }
+
+    public function getRoles() {
+    	if ($this->isAdmin) {
+    		return array('ROLE_ADMIN');
+    	}
+    	return array('ROLE_USER');
+    }
+
+    public function eraseCredentials() {
+
     }
 
     /**
@@ -188,8 +223,8 @@ class User
      */
     public function setCreatedAt()
     {
-        $this->created_at = new \DateTime("now");
-    	$this->updated_at = $this->created_at;
+        $this->createdAt = new \DateTime();
+    	$this->updatedAt = $this->createdAt;
     }
 
     /**
@@ -209,7 +244,7 @@ class User
      */
     public function setUpdatedAt()
     {
-        $this->updatedAt = new \DateTime("now");        
+        $this->updatedAt = new \DateTime();        
     }
 
     /**
@@ -255,4 +290,64 @@ class User
     {
         return $this->orders;
     }
+
+    /** @see \Serializable::serialize() */
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+            $this->username,
+            $this->password,
+            // see section on salt below
+            // $this->salt,
+        ));
+    }
+
+    /** @see \Serializable::unserialize() */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->username,
+            $this->password,
+            // see section on salt below
+            // $this->salt
+        ) = unserialize($serialized);
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $isActive
+     *
+     * @return User
+     */
+    public function setIsActive($isActive)
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword($password)
+    {
+        $this->plainPassword = $password;
+    }
+
+
 }

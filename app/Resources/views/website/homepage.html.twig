@@ -29,6 +29,11 @@
 
 	<div class="row">
 	    <div class="col-sm-8">
+	    	{% for flash_message in app.session.flashBag.get('notice') %}
+	    		<div class="flash-notice">
+	    			{{ flash_message }}
+	    		</div>
+	    	{% endfor %}
 	        <h2>What We Do</h2>
 	        <p>Online shopping from a great selection at CDs &amp; Vinyl Store.</p>
 	        <p>Get the latest CDs and exclusive music offers at BestBuy.com. Shop for music CDs, vinyl records, Blu-ray discs and music DVDs from the best new artists.</p>

@@ -47,6 +47,7 @@ class User implements UserInterface, \Serializable
      * @var bool
      *
      * @ORM\Column(name="is_admin", type="boolean")
+     * @Assert\Type(type="boolean", groups={"admin_update"})
      */
     private $isAdmin;
 
@@ -66,6 +67,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\Column(name="is_active", type="boolean")
+     * @Assert\Type(type="boolean", groups={"admin_update"})
      */
     private $isActive;
 

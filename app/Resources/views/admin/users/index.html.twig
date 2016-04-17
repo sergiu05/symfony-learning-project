@@ -1,0 +1,71 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title 'Dashboard | Users' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of   navigation changes. */
+        }
+    </style>
+
+    
+{% endblock %}  
+
+{% block body_class 'admin-users' %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8">
+            {{ include('admin/_flash_messages.html.twig') }}
+            <h1>Users</h1>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><i class="fa fa-user"></i> Name</th>
+                        <th>Is Admin?</th>
+                        <th>Is Active?</th>
+                        <th><i class="fa fa-calendar"></i> Created</th>
+                        <th><i class="fa fa-cogs"></i> Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            {% if user.isadmin %}
+                                <i class="fa fa-circle" aria-hidden="true"></i>
+                            {% else %}
+                                <i class="fa fa-circle-o" aria-hidden="true"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.isactive %}
+                                <i class="fa fa-circle" aria-hidden="true"></i>
+                            {% else %}
+                                <i class="fa fa-circle-o" aria-hidden="true"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.createdAt|date('d-m-Y') }}</td>
+                        <td>
+                            <div class="item-actions">
+                                <a href="{{ path('admin_user_edit', {id: user.id}) }}" btn="btn btn-sm btn-default"><i class="fa fa-edit"></i> Edit</a>
+                            </div>
+                        </td>
+                    </tr>        
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

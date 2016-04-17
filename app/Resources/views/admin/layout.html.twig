@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block header_navigation_links %}
+    <li>
+        <a href="{{ path('admin_genre_index') }}">
+            <i class="fa fa-list-alt"></i> Genres
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('admin_album_index') }}">
+            <i class="fa fa-list-alt"></i> Albums
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('homepage') }}">
+            <i class="fa fa-home"></i> Back to Website
+        </a>
+    </li>
+{% endblock %}

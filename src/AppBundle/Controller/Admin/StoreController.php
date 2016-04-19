@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use AppBundle\Entity\User;
 use AppBundle\Entity\Genre;
+use AppBundle\Entity\Album;
 
 
 use AppBundle\Form\UserUpdateStatusType;
@@ -29,13 +30,6 @@ class StoreController extends Controller {
 		$users = $repository->findAll();
  
 		return $this->render("admin/users/index.html.twig", ['users' => $users]);
-	}
-
-	/**
-	 * @Route("/albums", name="admin_album_index")
-	 */
-	public function getAlbumsAction() {
-
 	}
 
 	/**
@@ -169,7 +163,40 @@ class StoreController extends Controller {
 			'user'			=> $user,
 			'edit_form'		=> $editForm->createView()
 		));
+	}
 
+	/**
+	 * @Route("/albums", name="admin_album_index")
+	 */
+	public function getAlbumsAction() {
+		$repository = $this->getDoctrine()->getRepository('AppBundle:Album');
+		$albums = $repository->getAlbumsWithArtists();
+
+		return $this->render('admin/albums/index.html.twig', compact('albums'));
+	}
+
+	/**
+	 * Creates a new Album entity.
+	 *
+	 * @Route("/albums/create", name="admin_album_new")
+	 * @Method({"GET", "POST"})
+	 */
+	public function createAlbumAction(Request $request) {
+		$album = new Album;
+		
+		$form = $this->createForm('AppBundle\Form\AlbumType', $album);
+		$form->handleRequest($request);
+
+		if ($form->isSubmitted() && $form->isValid()) {
+			$em = $this->getDoctrine()->getManager();
+			$em->persist($album);
+			$em->flush();
+
+			$this->addFlash('success', 'Album created successfully.');
+			return $this->redirectToRoute('admin_album_index');
+		}
+
+		return $this->render('admin/albums/new.html.twig', ['form' => $form->createView()]);
 
 	}
 

@@ -3,6 +3,8 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Album
@@ -26,6 +28,7 @@ class Album
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $title;
 
@@ -33,20 +36,23 @@ class Album
      * @var int
      *
      * @ORM\Column(name="price", type="integer")
+     * @Assert\NotBlank()          
      */
     private $price;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="image", type="string", length=255)
+     * @ORM\Column(name="path", type="string", length=255)
      */
-    private $image;
+    private $path;
 
     /**
      * @var string
      *
      * @ORM\Column(name="description", type="text")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="string")
      */
     private $description;
 
@@ -67,14 +73,34 @@ class Album
     /**
      * @ORM\ManyToOne(targetEntity="Genre",inversedBy="albums")
      * @ORM\JoinColumn(name="genre_id", referencedColumnName="id")
+     * @Assert\NotBlank()
      */
     private $genre;
 
     /**
      * @ORM\ManyToOne(targetEntity="Artist",inversedBy="albums")
      * @ORM\JoinColumn(name="artist_id", referencedColumnName="id")
+     * @Assert\NotBlank()
      */
     private $artist;
+
+    /**
+     * @Assert\File(
+     *		maxSize="5M",
+	 *		mimeTypes = {"image/jpeg", "image/gif", "image/png", "image/tiff"},
+	 *		maxSizeMessage = "Max file size is 5mb.",
+	 *		mimeTypesMessage = "Only image files are allowed."
+     *		)
+     * @Assert\NotBlank()
+     */
+    private $file;
+
+    /**
+     * @var string
+     *
+     * Stores the previous image path, comes in handy when deleting the previous image
+     */
+    private $temp;
 
 
     /**
@@ -135,29 +161,7 @@ class Album
         return round($this->price/100, 2);
     }
 
-    /**
-     * Set image
-     *
-     * @param string $image
-     *
-     * @return Post
-     */
-    public function setImage($image)
-    {
-        $this->image = $image;
-
-        return $this;
-    }
-
-    /**
-     * Get image
-     *
-     * @return string
-     */
-    public function getImage()
-    {
-        return $this->image;
-    }
+    
 
 	/**
      * Set createdAt
@@ -271,4 +275,84 @@ class Album
     {
         return $this->artist;
     }
+
+    public function getAbsolutePath() {
+    	return null === $this->path ? null : $this->getUploadRootDir().'/'.$this->path;
+    }
+
+    public function getWebPath() {
+    	return null === $this->path ? null : $this->getUploadDir().'/'.$this->path;
+    }
+
+    public function getUploadRootDir() {
+    	return __DIR__.'/../../../web/'.$this->getUploadDir();
+    }
+
+    public function getUploadDir() {
+    	return 'uploads/documents';
+    }
+
+    /**
+     * Sets file.
+     *
+     * @param UploadedFile $file
+     */
+    public function setFile(UploadedFile $file = null) {
+    	$this->file = $file;
+
+    	if (isset($this->path)) {
+    		$this->temp = $this->path;
+    		$this->path = null;
+    	} else {
+    		$this->path = 'initial';
+    	}
+    }
+
+    /**
+     * Get file
+	 *
+     * @return UploadedFile | null
+     */
+    public function getFile() {
+    	return $this->file;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function preUpload() {
+    	if ( null !== $this->getFile()) {
+    		$filename = sha1(uniqid(mt_rand(), true));
+    		$this->path = $filename.'.'.$this->getFile()->guessExtension();
+    	}
+    }
+
+    /**
+     * @ORM\PostPersist()
+     * @ORM\PostUpdate()
+     */
+    public function upload() {
+    	if (null === $this->getFile()) {
+    		return;
+    	}
+    	$this->getFile()->move($this->getUploadRootDir(), $this->path);
+
+    	if (isset($this->temp)) {
+    		unlink($this->getUploadRootDir().'/'.$this->temp);
+    		$this->temp = null;
+    	}
+    	$this->file = null;
+    }
+
+    /**
+     * @ORM\PostRemove()
+     */
+    public function removeUpload() {
+    	$file = $this->getAbsolutePath();
+    	if ($file) {
+    		unlink($file);
+    	}
+    }
+
 }

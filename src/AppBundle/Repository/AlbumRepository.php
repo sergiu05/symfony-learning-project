@@ -26,4 +26,14 @@ class AlbumRepository extends \Doctrine\ORM\EntityRepository
 			return null;
 		}
 	}
+
+	public function getAlbumsWithArtists() {
+
+		return $this->getEntityManager()
+					->createQuery(
+						'SELECT a, artist FROM AppBundle:Album a
+						LEFT JOIN a.artist artist
+						'
+					)->getResult();
+	}
 }

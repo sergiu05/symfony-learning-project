@@ -1,0 +1,72 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% form_theme form with ['bootstrap_3_layout.html.twig', 'form/fields.html.twig'] %}
+
+{% block title 'Create New Album' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of   navigation changes. */
+        }
+        .btn-file {
+	        position: relative;
+	        overflow: hidden;
+	        font-weight: bold;
+	    }
+	    .btn-file input[type=file] {
+	        position: absolute;
+	        top: 0;
+	        right: 0;
+	        min-width: 100%;
+	        min-height: 100%;
+	        font-size: 100px;
+	        text-align: right;
+	        filter: alpha(opacity=0);
+	        opacity: 0;
+	        outline: none;
+	        background: white;
+	        cursor: inherit;
+	        display: block;
+	    }        
+    </style>    
+{% endblock %}  
+
+{% block body_class 'admin-new-album' %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+        	<h1>New Album</h1>
+        	{{ form_start(form, { attr: { novalidate: 'novalidate'}}) }}
+	        	{{ form_row(form.title) }}
+	        	{{ form_row(form.price) }}
+	        	{{ form_row(form.description) }}  
+	        	{{ form_row(form.file) }}    
+	        	{{ form_row(form.genre) }}    
+	        	{{ form_row(form.artist) }}    
+	        	<input type="submit" value="Create" class="btn btn-primary">
+	        	<a href="{{ path('admin_album_index') }}" class="btn btn-link">Back to list</a>
+        	{{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+	$(document).on('change', '.btn-file :file', function() {
+        var input = $(this),
+            numFiles = input.get(0).files ? input.get(0).files.length : 1,
+            label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.trigger('fileselect', [numFiles, label]);
+    });
+    $(document).ready( function() {
+        $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+            $(this).siblings('.content').html('File ' + label);
+        });
+    });
+</script>
+{% endblock %}

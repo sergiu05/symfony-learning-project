@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block title 'Dashboard | Genres' %}
+{% block title 'Dashboard | Albums' %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -15,7 +15,7 @@
     </style>    
 {% endblock %}  
 
-{% block body_class 'admin-genres' %}
+{% block body_class 'admin-albums' %}
 
 {% block body %}
 
@@ -30,10 +30,10 @@
 
     <div class="row">
     	<div class="col-sm-3 col-sm-offset-3">
-    		<h1>Genders</h1>
+    		<h1>Albums</h1>
     	</div>
     	<div class="col-sm-3 create-button-wrapper">
-    		<a href="{{ path('admin_genre_new') }}" class="btn btn-success">
+    		<a href="{{ path('admin_album_new') }}" class="btn btn-success">
     			<i class="fa fa-plus"></i> Create
     		</a>
     	</div>
@@ -46,27 +46,22 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th> Name</th>
+                        <th>Name</th>
+                        <th>Artist</th>
+                        <th>Image</th>
                         <th><i class="fa fa-cogs"></i> Action</th>                        
                     </tr>
                 </thead>
                 <tbody>
-                {% for genre in genres %}
+                {% for album in albums %}
                 	<tr>
                 		<td>{{ loop.index }}</td>
-                		<td>{{ genre.name }}</td>
+                		<td>{{ album.title }}</td>
+                		<td>{{ album.artist.name }}</td>
+                		<td><img height="30" width="auto" src="{{ asset(album.getWebPath()) }}" alt="image of {{ album.title }}"></td>
                 		<td>
                 			<div class="item-actions">
-                				<a href="{{ path('admin_genre_edit', { id: genre.id}) }}" class="btn btn-sm btn-default">Edit</a>
-                				{# only the genders with no albums attached can be deleted #}
-                				{% if forms[genre.id] %}
-	                				{{ include('admin/_form.html.twig', {
-	                					form: forms[genre.id],
-	                					button_label: 'Delete',
-	                					button_css: 'btn btn-sm btn-danger',
-	                					show_confirmation: true
-	                				}, with_context = false) }}
-                				{% endif %}                				
+                				-
                 			</div>
                 		</td>
                 	</tr>

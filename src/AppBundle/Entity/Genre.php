@@ -4,7 +4,8 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
-
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Genre
  *
@@ -27,6 +28,7 @@ class Genre
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $name;
 
@@ -34,15 +36,27 @@ class Genre
      * @var string
      *
      * @ORM\Column(name="description", type="text")
+     * @Assert\NotBlank()
      */
     private $description;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="image", type="string", length=255)
+     * @ORM\Column(name="path", type="string", length=255)
      */
-    private $image;
+    private $path;
+
+    /**
+     * @Assert\File(
+     *		maxSize="5M",
+	 *		mimeTypes = {"image/jpeg", "image/gif", "image/png", "image/tiff"},
+	 *		maxSizeMessage = "Max file size is 5mb.",
+	 *		mimeTypesMessage = "Only image files are allowed."
+     *		)
+     * @Assert\NotBlank(groups={"Create"})
+     */
+    private $file;
 
     /**
      * @var \DateTime
@@ -79,6 +93,24 @@ class Genre
     }
 
     /**
+     * Sets file
+     *
+     * @param UploadedFile $file
+     */
+    public function setFile(UploadedFile $file = null) {
+    	if ($file) $this->file = $file;
+    }
+
+    /**
+     * Get file.
+     *
+     * @return UploadedFile
+     */
+    public function getFile() {
+    	return $this->file;
+    }
+
+    /**
      * Set name
      *
      * @param string $name
@@ -100,6 +132,23 @@ class Genre
     public function getName()
     {
         return $this->name;
+    }
+
+    public function getAbsolutePath() {
+
+    	return null === $this->path ? null : $this->getUploadRootDir().'/'.$this->path;
+    }
+
+    public function getWebPath() {
+    	return null === $this->path ? null : $this->getUploadDir().'/'.$this->path;
+    }
+
+    protected function getUploadRootDir() {
+    	return __DIR__.'/../../../web/'.$this->getUploadDir();
+    }
+
+    protected function getUploadDir() {
+    	return 'uploads/documents';
     }
 
     /**
@@ -127,38 +176,14 @@ class Genre
     }
 
     /**
-     * Set image
-     *
-     * @param string $image
-     *
-     * @return Genre
-     */
-    public function setImage($image)
-    {
-        $this->image = $image;
-
-        return $this;
-    }
-
-    /**
-     * Get image
-     *
-     * @return string
-     */
-    public function getImage()
-    {
-        return $this->image;
-    }
-
-    /**
      * Set createdAt
      *
      * @ORM\PrePersist     
      */
     public function setCreatedAt()
     {
-        $this->created_at = new \DateTime("now");
-    	$this->updated_at = $this->created_at;
+        $this->createdAt = new \DateTime("now");
+    	$this->updatedAt = $this->createdAt;
     }
 
     /**
@@ -223,5 +248,31 @@ class Genre
     public function getAlbums()
     {
         return $this->albums;
+    }    
+
+    /**
+     * A genre is deletable is it has no albums attached
+     *
+     * @return boolean
+     */
+    public function isDeletable() {
+    	return 0 == count($this->getAlbums());
+    }
+
+    public function upload() {
+    	if (null === $this->getFile()) {
+    		return;
+    	}
+
+    	$newFilename = sha1(uniqid(mt_rand(), true)).'.'.$this->getFile()->guessExtension();
+
+    	$this->getFile()->move(
+    		$this->getUploadRootDir(),
+    		$newFilename
+    	);
+
+    	$this->path = $newFilename;
+
+    	$this->file = null;
     }
 }

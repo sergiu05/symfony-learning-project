@@ -1,0 +1,53 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% form_theme edit_form with ['bootstrap_3_layout.html.twig', 'form/fields.html.twig'] %}
+
+{% block title 'Dashboard | Edit Genre' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of   navigation changes. */
+        }
+         .btn-file {
+	        position: relative;
+	        overflow: hidden;
+	        font-weight: bold;
+	    }
+	    .btn-file input[type=file] {
+	        position: absolute;
+	        top: 0;
+	        right: 0;
+	        min-width: 100%;
+	        min-height: 100%;
+	        font-size: 100px;
+	        text-align: right;
+	        filter: alpha(opacity=0);
+	        opacity: 0;
+	        outline: none;
+	        background: white;
+	        cursor: inherit;
+	        display: block;
+	    }        
+    </style>
+{% endblock %}
+
+{% block body_class 'admin-edit-genre' %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+        	<h1>Edit {{ genre.name }}</h1>
+
+        	{{ include('admin/_form.html.twig', {
+        		form: edit_form,
+        		attr: { novalidate: 'novalidate' },
+        		button_label: 'Edit genre',
+        		button_css: 'btn btn-info'
+        	}, with_context = false) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

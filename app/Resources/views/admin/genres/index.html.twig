@@ -1,0 +1,105 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title 'Dashboard | Albums' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of   navigation changes. */
+        }
+        .item-actions > * {float: left; }
+        .item-actions > a {margin-right: 10px; }
+        .create-button-wrapper { text-align: right; }
+        .create-button-wrapper > a { margin-top: 30px; }
+    </style>    
+{% endblock %}  
+
+{% block body_class 'admin-genres' %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+
+        	{{ include('admin/_flash_messages.html.twig') }}
+
+        </div>
+    </div>
+
+    <div class="row">
+    	<div class="col-sm-3 col-sm-offset-3">
+    		<h1>Genders</h1>
+    	</div>
+    	<div class="col-sm-3 create-button-wrapper">
+    		<a href="{{ path('admin_genre_new') }}" class="btn btn-success">
+    			<i class="fa fa-plus"></i> Create
+    		</a>
+    	</div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th> Name</th>
+                        <th><i class="fa fa-cogs"></i> Action</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                {% for genre in genres %}
+                	<tr>
+                		<td>{{ loop.index }}</td>
+                		<td>{{ genre.name }}</td>
+                		<td>
+                			<div class="item-actions">
+                				<a href="{{ path('admin_genre_edit', { id: genre.id}) }}" class="btn btn-sm btn-default">Edit</a>
+                				{# only the genders with no albums attached can be deleted #}
+                				{% if forms[genre.id] %}
+	                				{{ include('admin/_form.html.twig', {
+	                					form: forms[genre.id],
+	                					button_label: 'Delete',
+	                					button_css: 'btn btn-sm btn-danger',
+	                					show_confirmation: true
+	                				}, with_context = false) }}
+                				{% endif %}                				
+                			</div>
+                		</td>
+                	</tr>
+                {% endfor %}
+            	</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block custom_javascripts %}
+	{{ parent() }}
+	<script>
+	$('form').on('submit', function(event) {
+		var $form = $(this),
+        	$confirm = $('#confirmationModal');
+        	
+        if ($confirm.data('result') !== 'yes') {
+            //cancel submit event
+            event.preventDefault();
+
+            $confirm
+                .off('click', '#btnYes')
+                .on('click', '#btnYes', function () {
+                    $confirm.data('result', 'yes');
+                    $form.find('input[type="submit"]').attr('disabled', 'disabled');
+                    $form.submit();
+                })
+                .modal('show');
+        }
+	});
+	 
+	</script>
+{% endblock %}

@@ -9,3 +9,46 @@
     {% if form.parent %}</span>{% else %}</div>{% endif %}
     {%- endif %}
 {%- endblock form_errors %}
+ 
+{# wrap the input file type within the label tag, so that styling will be easier #}
+{% block file_row %}
+    {% spaceless %}
+    <div class="form-group{% if (not compound or force_error|default(false)) and not valid %} has-error{% endif %}">
+    	{%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' control-label')|trim}) -%}
+    	{% if label is not same as(false) -%}
+        	{% if not compound -%}
+            	{% set label_attr = label_attr|merge({'for': id}) %}
+        	{%- endif -%}
+        	{% if required -%}
+            	{% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+        	{%- endif -%}
+       		{% if label is empty -%}
+            {%- if label_format is not empty -%}
+                {% set label = label_format|replace({
+                    '%name%': name,
+                    '%id%': id,
+                }) %}
+            {%- else -%}
+                {% set label = name|humanize %}
+            {%- endif -%}
+        {%- endif -%}
+        <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}><span class="btn btn-default btn-file"><span class="content">{{ translation_domain is same as(false) ? label : label|trans({}, translation_domain) }}</span>
+    	{%- endif -%}
+
+    	{%- set type = type|default('text') -%}
+    		
+    	<input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    	</span>
+    	</label>
+    	{% if errors|length > 0 -%}
+    	{% if form.parent %}<span class="help-block">{% else %}<div class="alert alert-danger">{% endif %}
+    	<ul class="list-unstyled">
+        	{%- for error in errors -%}
+            <li><i class="fa fa-exclamation" aria-hidden="true"></i> {{ error.message }}</li>
+        	{%- endfor -%}
+    	</ul>
+    	{% if form.parent %}</span>{% else %}</div>{% endif %}
+    	{%- endif %}
+	</div>
+    {% endspaceless %}
+{% endblock %}

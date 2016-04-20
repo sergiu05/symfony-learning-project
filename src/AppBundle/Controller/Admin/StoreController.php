@@ -170,9 +170,21 @@ class StoreController extends Controller {
 	 */
 	public function getAlbumsAction() {
 		$repository = $this->getDoctrine()->getRepository('AppBundle:Album');
-		$albums = $repository->getAlbumsWithArtists();
+		$albums = $repository->getAlbumsWithArtistsAndOrders();
 
-		return $this->render('admin/albums/index.html.twig', compact('albums'));
+		$forms = [];
+		foreach($albums as $album) {
+			$forms[$album->getId()] = $album->isDeletable() ? $this->createDeleteAlbumForm($album)->createView() : null;
+		}
+
+		return $this->render('admin/albums/index.html.twig', compact('albums', 'forms'));
+	}
+
+	private function createDeleteAlbumForm(Album $album) {
+		return $this->createFormBuilder()
+					->setAction($this->generateUrl('admin_album_delete', ['id' => $album->getId()]))
+					->setMethod('DELETE')
+					->getForm();
 	}
 
 	/**
@@ -198,6 +210,44 @@ class StoreController extends Controller {
 
 		return $this->render('admin/albums/new.html.twig', ['form' => $form->createView()]);
 
+	}
+
+	/**
+	 * @Route("/albums/{id}/edit", requirements={"id" = "\d+"}, name="admin_album_edit")
+	 * @Method({"GET", "POST"})
+	 */
+	public function editAlbumAction(Album $album, Request $request) {
+		$editForm = $this->createForm('AppBundle\Form\AlbumType', $album);
+		$editForm->handleRequest($request);
+		if ($editForm->isSubmitted() && $editForm->isValid()) {
+			$em = $this->getDoctrine()->getManager();
+			$em->flush();
+
+			$this->addFlash("success", "Album #{$album->getId()} was updated.");
+			return $this->redirectToRoute('admin_album_index');
+		}
+		return $this->render('admin/albums/edit.html.twig', [
+				'album' => $album,
+				'edit_form' => $editForm->createView()
+			]);
+	}
+
+	/**
+	 * @Route("/albums/{id}", requirements={"id"="\d+"}, name="admin_album_delete")
+	 * @Method({"DELETE"})
+	 * @Security("album.isDeletable()")
+	 */
+	public function deleteAlbumAction(Album $album, Request $request) {
+		$form = $this->createDeleteAlbumForm($album);
+		$form->handleRequest($request);
+		if ($form->isSubmitted() && $form->isValid()) {
+			$em = $this->getDoctrine()->getManager();
+			$em->remove($album);
+			$em->flush();
+
+			$this->addFlash('success', 'Album was deleted.');
+		}
+		return $this->redirectToRoute('admin_album_index');
 	}
 
 }

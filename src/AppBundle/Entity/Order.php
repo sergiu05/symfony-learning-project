@@ -100,8 +100,8 @@ class Order
      */
     public function setCreatedAt()
     {
-        $this->created_at = new \DateTime("now");
-    	$this->updated_at = $this->created_at;
+        $this->createdAt = new \DateTime("now");
+    	$this->updatedAt = $this->createdAt;
     }
 
     /**

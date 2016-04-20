@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\Form\FormInterface;
 
 class AlbumType extends AbstractType
 {
@@ -50,7 +51,15 @@ class AlbumType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Album'
+            'data_class' => 'AppBundle\Entity\Album',
+            'validation_groups' => function (FormInterface $form) {
+            	$data = $form->getData();
+            	/* different validation groups for new / existing entities (upload file is required for new entities; optional for updating existing entities) */
+            	if ($data->getId()) {
+            		return array('Default');
+            	}
+            	return array('Default', 'Create');
+            }
         ));
     }
 }

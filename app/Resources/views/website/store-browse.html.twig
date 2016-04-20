@@ -29,7 +29,7 @@
 	<div class="row">
 		<div class="col-md-7">
 			<a href="{{ url('browse_genre', {'genre': genre.name}) }}">				
-				<img class="img-responsive" src="{{ asset('bundles/app/images/') ~ genre.image }}" alt="">				
+				<img class="img-responsive" src="{{ asset(genre.getWebPath()) }}" alt="image of {{ genre.name }}">				
 			</a>
 		</div>
 		<div class="col-md-5">

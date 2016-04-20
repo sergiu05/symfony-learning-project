@@ -30,7 +30,7 @@
     {% for album in albums %}
     <div class="col-lg-3 col-md-4 col-xs-6 thumb">
         <a class="thumbnail" href="{{ path('album_details', {'album_id': album.id}) }}">
-            <img class="img-responsive" src="{{ asset('bundles/app/images/') ~ album.image }}" alt="">
+            <img class="img-responsive" src="{{ asset(album.getWebPath()) }}" alt="">
         </a>
     </div>
     {% else %}

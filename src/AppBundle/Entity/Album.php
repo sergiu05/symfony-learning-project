@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Album
@@ -91,7 +92,7 @@ class Album
 	 *		maxSizeMessage = "Max file size is 5mb.",
 	 *		mimeTypesMessage = "Only image files are allowed."
      *		)
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"Create"})
      */
     private $file;
 
@@ -101,6 +102,15 @@ class Album
      * Stores the previous image path, comes in handy when deleting the previous image
      */
     private $temp;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Orderdetail", mappedBy="album")     
+     */
+    private $orderdetails;
+
+    public function __construct() {
+    	$this->orderdetails = new ArrayCollection();
+    }
 
 
     /**
@@ -159,9 +169,7 @@ class Album
     public function getPrice()
     {
         return round($this->price/100, 2);
-    }
-
-    
+    }    
 
 	/**
      * Set createdAt
@@ -170,8 +178,8 @@ class Album
      */
     public function setCreatedAt()
     {
-        $this->created_at = new \DateTime("now");
-    	$this->updated_at = $this->created_at;
+        $this->createdAt = new \DateTime("now");
+    	$this->updatedAt = $this->createdAt;
     }
 
     /**
@@ -353,6 +361,49 @@ class Album
     	if ($file) {
     		unlink($file);
     	}
+    }
+
+    /**
+     * Add orderdetail
+     *
+     * @param \AppBundle\Entity\Orderdetail $orderdetail
+     *
+     * @return Order
+     */
+    public function addOrderdetail(\AppBundle\Entity\Orderdetail $orderdetail)
+    {
+        $this->orderdetails[] = $orderdetail;
+
+        return $this;
+    }
+
+    /**
+     * Remove orderdetail
+     *
+     * @param \AppBundle\Entity\Orderdetail $orderdetail
+     */
+    public function removeOrderdetail(\AppBundle\Entity\Orderdetail $orderdetail)
+    {
+        $this->orderdetails->removeElement($orderdetail);
+    }
+
+    /**
+     * Get orderdetails
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getOrderdetails()
+    {
+        return $this->orderdetails;
+    }
+
+    /**
+     * An album is deletable only if no orders were place for it
+     *
+     * @return boolean
+     */
+    public function isDeletable() {
+    	return (0 === count($this->getOrderdetails()));
     }
 
 }

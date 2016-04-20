@@ -61,7 +61,15 @@
                 		<td><img height="30" width="auto" src="{{ asset(album.getWebPath()) }}" alt="image of {{ album.title }}"></td>
                 		<td>
                 			<div class="item-actions">
-                				-
+                				<a href="{{ path('admin_album_edit', { id: album.id}) }}" class="btn btn-sm btn-default">Edit</a>
+                				{% if forms[album.id] %}
+                					{{ include('admin/_form.html.twig', {
+                						form: forms[album.id],
+                						button_label: 'Delete Album',
+                						button_css: 'btn btn-sm btn-danger',
+                						show_confirmation: true
+                					}, with_context = null)	}}
+                				{% endif %}
                 			</div>
                 		</td>
                 	</tr>
@@ -74,8 +82,7 @@
 
 {% endblock %}
 
-{% block custom_javascripts %}
-	{{ parent() }}
+{% block custom_js %}	
 	<script>
 	$('form').on('submit', function(event) {
 		var $form = $(this),

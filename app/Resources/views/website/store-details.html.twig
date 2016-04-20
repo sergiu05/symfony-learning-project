@@ -31,7 +31,7 @@
     <div class="col-md-5">
 
         <div class="thumbnail">
-            <img class="img-responsive" src="{{ asset('bundles/app/images/' ~ album.image) }}" alt="">
+            <img class="img-responsive" src="{{ asset(album.getWebPath()) }}" alt="image of album.name">
             <div class="caption-full">
                 <h4 class="pull-right">${{ album.price }}</h4>
                 <h4><a href="{{ path('album_details', {'album_id': album.id}) }}">{{ album.title }}</a>

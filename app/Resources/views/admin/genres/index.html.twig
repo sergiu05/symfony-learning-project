@@ -79,8 +79,7 @@
 
 {% endblock %}
 
-{% block custom_javascripts %}
-	{{ parent() }}
+{% block custom_js %}	
 	<script>
 	$('form').on('submit', function(event) {
 		var $form = $(this),
@@ -99,7 +98,6 @@
                 })
                 .modal('show');
         }
-	});
-	 
+	});	 
 	</script>
 {% endblock %}

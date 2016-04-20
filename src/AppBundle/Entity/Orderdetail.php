@@ -57,7 +57,7 @@ class Orderdetail
     private $order;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Album")
+     * @ORM\ManyToOne(targetEntity="Album", inversedBy="orderdetails")
      * @ORM\JoinColumn(name="album_id", referencedColumnName="id")
      */
     private $album;

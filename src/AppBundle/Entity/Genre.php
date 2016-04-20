@@ -98,7 +98,7 @@ class Genre
      * @param UploadedFile $file
      */
     public function setFile(UploadedFile $file = null) {
-    	if ($file) $this->file = $file;
+    	$this->file = $file;
     }
 
     /**

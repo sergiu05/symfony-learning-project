@@ -27,12 +27,13 @@ class AlbumRepository extends \Doctrine\ORM\EntityRepository
 		}
 	}
 
-	public function getAlbumsWithArtists() {
+	public function getAlbumsWithArtistsAndOrders() {
 
 		return $this->getEntityManager()
 					->createQuery(
-						'SELECT a, artist FROM AppBundle:Album a
+						'SELECT a, artist, od FROM AppBundle:Album a
 						LEFT JOIN a.artist artist
+						LEFT JOIN a.orderdetails od
 						'
 					)->getResult();
 	}

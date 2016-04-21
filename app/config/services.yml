@@ -7,3 +7,10 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    app.session_storage:
+        class: AppBundle\Storage\SessionStorage 
+        arguments: ['@session']
+
+    app.cart:
+        class: AppBundle\Cart\Cart 
+        arguments: ['@app.session_storage']

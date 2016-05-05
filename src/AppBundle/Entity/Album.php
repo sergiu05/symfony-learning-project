@@ -12,7 +12,7 @@ use AppBundle\Cart\EntityInterface;
  * Album
  *
  * @ORM\Table(name="albums")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\AlbumRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\DoctrineORMAlbumRepository")
  * @ORM\HasLifecycleCallbacks
  */
 class Album implements EntityInterface

@@ -14,3 +14,32 @@ services:
     app.cart:
         class: AppBundle\Cart\Cart 
         arguments: ['@app.session_storage']
+
+    app.doctrine_genre_repository:
+        class: Doctrine\ORM\EntityRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments:
+            - AppBundle\Entity\Genre  
+        autowiring_types: AppBundle\Repository\GenreInterface
+
+    app.doctrine_album_repository:
+        class: Doctrine\ORM\EntityRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments:
+            - AppBundle\Entity\Album 
+        autowiring_types: AppBundle\Repository\AlbumInterface
+
+    # define controller as a service
+    app.store_controller:
+        class: AppBundle\Controller\StoreController
+        autowire: true
+
+    # services to be injected in the controllers defined as a service
+    app.common_services:
+        class: AppBundle\Services\CommonServices 
+        arguments: ['@templating', '@router']
+    
+    
+
+
+

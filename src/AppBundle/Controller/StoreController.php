@@ -2,18 +2,61 @@
 
 namespace AppBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
-class StoreController extends Controller
+use AppBundle\Repository\GenreInterface;
+use AppBundle\Repository\AlbumInterface;
+use AppBundle\Services\CommonServices;
+
+/**
+ * @Route(service="app.store_controller")
+ */
+class StoreController 
 {	
+	/**
+	 * The Genre repository instance
+ 	 *
+	 * @var AppBundle\Repository\GenreInterface
+	 */
+	protected $genres;
+
+	/**
+	 * The Album repository instance
+	 *
+	 * @var AppBundle\Repository\AlbumInterface
+	 */
+	protected $albums;
+
+	/**
+	 * @var AppBundle\Services\CommonServices 	 
+	 */
+	protected $_services;
+	
+	/**
+	 * Create a new controller instance. Since this controller no longer extends the Symfony base Controller class
+	 * some of the former helper methods (e.g. render()) are now injected with an instance of CommonServices class
+	 * (http://symfony.com/doc/current/cookbook/controller/service.html#alternatives-to-base-controller-methods)
+ 	 *
+	 * @param GenreInterface $genres
+	 * @param AlbumInterface $albums
+	 * @param CommonServices $services	 
+	 */
+	public function __construct(GenreInterface $genres, AlbumInterface $albums, CommonServices $services) {
+
+		$this->genres = $genres;
+		$this->albums = $albums;
+		$this->_services = $services;
+
+	} 
+	
 	/**
      * @Route("/", name="homepage")
      */
     public function indexAction() {
-
-        return $this->render('website/homepage.html.twig');
+    	
+    	return $this->_services->getTemplating()->renderResponse('website/homepage.html.twig');        
 
     }
 
@@ -22,13 +65,11 @@ class StoreController extends Controller
      *
      * @Route("/store", name="store")
      */
-    public function getGenresAction() {    	
+    public function getGenresAction() {    	    	
 
-    	$repository = $this->getDoctrine()->getRepository('AppBundle:Genre');
+    	$genres = $this->genres->all();
 
-    	$genres = $repository->findAll();
-
-    	return $this->render('website/store-browse.html.twig', array('genres' => $genres));
+    	return $this->_services->getTemplating()->renderResponse('website/store-browse.html.twig', ['genres' => $genres]);    	
 
     }
 
@@ -37,16 +78,20 @@ class StoreController extends Controller
      *
      * @Route("/browse", name="browse_genre")
      */
-    public function getAlbumsAction(Request $request) {
-    	
-    	$repository = $this->getDoctrine()->getRepository('AppBundle:Album');
+    public function getAlbumsAction(Request $request) {    	
     	
     	if ($request->query->has('genre')) {    		
-			$albums = $repository->getAlbumsFor($request->query->get('genre'));
-    		return $this->render('website/store-index.html.twig', array('albums' => $albums, 'genre' => $request->query->get('genre')));
+			$albums = $this->albums->getAlbumsFor($request->query->get('genre'));
+    		return $this->_services->getTemplating()->renderResponse(
+    			'website/store-index.html.twig', 
+    			array(
+    				'albums' => $albums, 
+    				'genre' => $request->query->get('genre')
+    			)
+    		);
     	} 
 		
-    	return $this->redirectToRoute('store');    	
+    	return new RedirectResponse($this->_services->getRouter()->generate('store'));
     }
 
     /**
@@ -62,17 +107,18 @@ class StoreController extends Controller
      */
     public function getAlbumDetails($album_id) {
 
-    	$albumRepository = $this->getDoctrine()->getRepository('AppBundle:Album');
-    	$genreRepository = $this->getDoctrine()->getRepository('AppBundle:Genre');
-
-    	if ($album = $albumRepository->find($album_id)) {    		
-    		$genres = $genreRepository->findAll();
-    		return $this->render('website/store-details.html.twig', array('album' => $album, 'genres' => $genres));
+    	if ($album = $this->albums->getById($album_id)) {    	
+    		$genres = $this->genres->all();
+    		return $this->_services->getTemplating()->renderResponse(
+    			'website/store-details.html.twig', 
+    			array(
+    				'album' => $album, 
+    				'genres' => $genres
+    			)
+    		);
     	}
-
-    	throw $this->createNotFoundException(
-            'No product found for id ' . $album_id
-        );
+    	
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('No product found for id ' . $album_id);
     }
 
 

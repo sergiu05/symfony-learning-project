@@ -74,4 +74,7 @@ assetic:
     write_to: %kernel.root_dir%/../web    
     filters:
         cssrewrite: ~
+
+ucu_cart:
+    session_key: second_cart
         

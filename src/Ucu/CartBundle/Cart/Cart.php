@@ -1,13 +1,13 @@
 <?php
 
-namespace AppBundle\Cart;
+namespace Ucu\CartBundle\Cart;
 
 use AppBundle\Storage\StorageInterface;
 
 class Cart implements CartInterface {
 
 	/**
-	 * Cart session bag
+	 * Cart session bag name
 	 */
 	const CART = '__cart__';
 

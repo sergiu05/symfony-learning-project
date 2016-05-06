@@ -1,3 +1,7 @@
 app:
     resource: "@AppBundle/Controller/"
     type:     annotation
+
+ucu_cart:
+    resource: "@UcuCartBundle/Resources/config/routing.xml"
+    prefix:   /

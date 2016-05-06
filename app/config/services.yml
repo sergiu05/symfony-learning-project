@@ -51,6 +51,10 @@ services:
         class: AppBundle\Controller\Admin\StoreController 
         autowire: true
 
+    app.shopping_controller:
+        class: AppBundle\Controller\ShoppingController 
+        autowire: true
+        
     # services to be injected in the controllers defined as a service
     app.common_services:
         class: AppBundle\Services\CommonServices 

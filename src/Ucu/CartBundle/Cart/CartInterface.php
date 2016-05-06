@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Cart;
+namespace Ucu\CartBundle\Cart;
 
 interface CartInterface {
 

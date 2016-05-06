@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Storage;
+namespace Ucu\CartBundle\Storage;
 
 interface StorageInterface {
 

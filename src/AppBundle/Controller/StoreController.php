@@ -11,6 +11,8 @@ use AppBundle\Repository\AlbumInterface;
 use AppBundle\Services\CommonServices;
 
 /**
+ * Controller as service
+ *
  * @Route(service="app.store_controller")
  */
 class StoreController 

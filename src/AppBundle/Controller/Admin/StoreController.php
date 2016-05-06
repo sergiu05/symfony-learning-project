@@ -23,6 +23,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 
 /**
+ * Controller as service
+ *
  * @Route("/admin", service="app.admin.store_controller")
  * @Security("has_role('ROLE_ADMIN')")
  */

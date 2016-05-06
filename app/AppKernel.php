@@ -18,7 +18,8 @@ class AppKernel extends Kernel
             new AppBundle\AppBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new Bmatzner\FontAwesomeBundle\BmatznerFontAwesomeBundle(),
-            new Knp\Bundle\MenuBundle\KnpMenuBundle()
+            new Knp\Bundle\MenuBundle\KnpMenuBundle(),
+            new Ucu\CartBundle\UcuCartBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

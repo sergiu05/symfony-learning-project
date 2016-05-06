@@ -7,29 +7,80 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
 use AppBundle\Entity\User;
 use AppBundle\Entity\Genre;
 use AppBundle\Entity\Album;
-
-
+use AppBundle\Repository\GenreInterface;
+use AppBundle\Repository\AlbumInterface;
+use AppBundle\Repository\UserInterface;
+use AppBundle\Services\CommonServices;
 use AppBundle\Form\UserUpdateStatusType;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+
+
 /**
- * @Route("/admin")
+ * @Route("/admin", service="app.admin.store_controller")
  * @Security("has_role('ROLE_ADMIN')")
  */
-class StoreController extends Controller {
+class StoreController {
 
+	/**
+	 * The Genre repository implementation
+	 *
+	 * @var AppBundle\Repository\GenreInterface
+	 */
+	protected $genres;
+
+	/**
+	 * The Album repository implementation
+	 *
+	 * @var AppBundle\Repository\AlbumInterface
+	 */
+	protected $albums;
+
+	/**
+	 * The User repository implementation
+	 *
+	 * @var AppBundle\Repository\UserInterface
+	 */
+
+	/**
+	 * @var AppBundle\Services\CommonServices
+	 */
+	protected $_services;
+
+	/**
+	 * Create a new controller instance
+	 *
+	 * @param GenreInterface $genres
+	 * @param AlbumInterface $albums
+	 * @param UserInterface $users
+	 * @param CommonServices $services
+	 */
+	public function __construct(GenreInterface $genres, AlbumInterface $albums, UserInterface $users, CommonServices $services) {
+
+		$this->genres = $genres;
+		$this->albums = $albums;
+		$this->users = $users;
+		$this->_services = $services;
+
+	}
 	/**
 	 * @Route("/users", name="admin_user_index")
 	 * @Route("/", name="admin_index")
 	 */
 	public function indexAction() {
 
-		$repository = $this->getDoctrine()->getRepository('AppBundle:User');
-		$users = $repository->findAll();
+		$users = $this->users->all();
  
-		return $this->render("admin/users/index.html.twig", ['users' => $users]);
+		return $this->_services->getTemplating()->renderResponse(
+			"admin/users/index.html.twig", 
+			['users' => $users]
+		);
 	}
 
 	/**
@@ -38,20 +89,23 @@ class StoreController extends Controller {
 	 */
 	public function getGenresAction() {
 
-		$repository = $this->getDoctrine()->getRepository('AppBundle:Genre');
-		$genres = $repository->getGenresWithAlbums();		
+		$genres = $this->genres->getGenresWithAlbums();		
 		$forms = [];
 		
 		foreach($genres as $genre) {						
 			$forms[$genre->getId()] = $genre->isDeletable() ? $this->createGenreDeleteForm($genre)->createView() : null;
 		}
 
-		return $this->render("admin/genres/index.html.twig", compact('genres', 'forms'));
+		return $this->_services->getTemplating()->renderResponse(
+			"admin/genres/index.html.twig", 
+			compact('genres', 'forms')
+		);
 	}
 
 	private function createGenreDeleteForm(Genre $genre) {
-		return $this->createFormBuilder()
-					->setAction($this->generateUrl('admin_genre_delete', ['id' => $genre->getId()] ))
+		return $this->_services->getFormFactory()
+					->createBuilder()
+					->setAction($this->_services->getRouter()->generate('admin_genre_delete', ['id' => $genre->getId()] ))
 					->setMethod('DELETE')
 					->getForm();
 	}
@@ -60,29 +114,30 @@ class StoreController extends Controller {
 	 * @Route("/genres/new", name="admin_genre_new")
 	 */
 	public function newGenreAction(Request $request) {
-		$genre = new Genre;
-
-		$form = $this->createForm('AppBundle\Form\GenreType', $genre);					
+		$genre = $this->genres->newEntity();
+		
+		$form = $this->_services->getFormFactory()->create('AppBundle\Form\GenreType', $genre);
 
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-			$em = $this->getDoctrine()->getManager();
-
+			
 			$genre->upload();
 
-			$em->persist($genre);
-			$em->flush();
+			$this->genres->save($genre);			
 
-			$this->addFlash('success', 'New genre with id '.$genre->getId().' created.');
+			$this->_services->addFlash('success', 'New genre with id '.$genre->getId().' created.');
 
-			return $this->redirectToRoute('admin_genre_index');
+			return new RedirectResponse($this->_services->getRouter()->generate('admin_genre_index'));
 		}
 
-		return $this->render('admin/genres/new.html.twig', array(
-			'genre' => $genre,
-			'form' => $form->createView()
-		));
+		return $this->_services->getTemplating()->renderResponse(
+			'admin/genres/new.html.twig', 
+			array(
+				'genre' => $genre,
+				'form' => $form->createView()
+			)
+		);
 	}
 
 
@@ -91,24 +146,24 @@ class StoreController extends Controller {
 	 * @Method({"GET", "POST"})
 	 */
 	public function editGenreAction(Request $request, Genre $genre) {
-		$form = $this->createForm('AppBundle\Form\GenreType', $genre, ["method" => "POST"]);
+		$form = $this->_services->getFormFactory()->create('AppBundle\Form\GenreType', $genre, ["method" => "POST"]);
 		$form->handleRequest($request);
 
-		if ($form->isSubmitted() && $form->isValid()) {
-			$em = $this->getDoctrine()->getManager();
+		if ($form->isSubmitted() && $form->isValid()) {			
 
 			if ($genre->getFile()) {
 				$genre->upload();
 			}
 
-			$em->flush();
+			$this->genres->save($genre, false);
 
-			$this->addFlash('success', 'Genre '.$genre->getName().' was updated successfully.');
-
-			return $this->redirectToRoute('admin_genre_index');
+			$this->_services->addFlash('success', 'Genre '.$genre->getName().' was updated successfully.');
+			
+			return new RedirectResponse($this->_services->getRouter()->generate('admin_genre_index'));
 		}
 
-		return $this->render('admin/genres/edit.html.twig', [
+		return $this->_services->getTemplating()->renderResponse(
+			'admin/genres/edit.html.twig', [
 				'genre' => $genre,
 				'edit_form' => $form->createView()
 			]);
@@ -124,14 +179,11 @@ class StoreController extends Controller {
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-			$em = $this->getDoctrine()->getManager();
-			$em->remove($genre);
-			$em->flush();
-
-			$this->addFlash('success', "Genre deleted successfully.");
+			$this->genres->delete($genre);
+			$this->_services->addFlash('success', "Genre deleted successfully.");
 		}
 
-		return $this->redirectToRoute('admin_genre_index');
+		return new RedirectResponse($this->_services->getRouter()->generate('admin_genre_index'));
 	}
 
 
@@ -140,49 +192,53 @@ class StoreController extends Controller {
 	 * @Method({"GET", "POST"})
 	 */
 	public function editUserAction($id, Request $request) {
-		$em = $this->getDoctrine()->getManager();
-		$repository = $this->getDoctrine()->getRepository('AppBundle:User');
-		$user = $em->getRepository('AppBundle:User')->find($id);
+		
+		$user = $this->users->find($id);
 
 		if (!$user) {
-			throw $this->createNotFoundException('No user found for id '.$id);
+			throw new NotFoundHttpException('No user found for id '.$id);
 		}
 
-		$editForm = $this->createForm(UserUpdateStatusType::class, $user);
+		$editForm = $this->_services->getFormFactory()->create(UserUpdateStatusType::class, $user);
 		
 		$editForm->handleRequest($request);
 
 		if ($editForm->isSubmitted() && $editForm->isValid()) {
-			$em->flush();
+			
+			$this->users->save($user, false);
 
-			$this->addFlash('success', "User #{$user->getId()} updated.");
-			return $this->redirectToRoute('admin_user_index');
+			$this->_services->addFlash('success', "User #{$user->getId()} updated.");
+			return new RedirectResponse($this->_services->getRouter()->generate('admin_user_index'));
 		}
 
-		return $this->render('admin/users/edit.html.twig', array(
-			'user'			=> $user,
-			'edit_form'		=> $editForm->createView()
-		));
+		return $this->_services->getTemplating()->renderResponse(
+			'admin/users/edit.html.twig', 
+			array(
+				'user'			=> $user,
+				'edit_form'		=> $editForm->createView()
+			)
+		);
 	}
 
 	/**
 	 * @Route("/albums", name="admin_album_index")
 	 */
 	public function getAlbumsAction() {
-		$repository = $this->getDoctrine()->getRepository('AppBundle:Album');
-		$albums = $repository->getAlbumsWithArtistsAndOrders();
+		
+		$albums = $this->albums->getAlbumsWithArtistsAndOrders();
 
 		$forms = [];
 		foreach($albums as $album) {
 			$forms[$album->getId()] = $album->isDeletable() ? $this->createDeleteAlbumForm($album)->createView() : null;
 		}
 
-		return $this->render('admin/albums/index.html.twig', compact('albums', 'forms'));
+		return $this->_services->getTemplating()->renderResponse('admin/albums/index.html.twig', compact('albums', 'forms'));
 	}
 
 	private function createDeleteAlbumForm(Album $album) {
-		return $this->createFormBuilder()
-					->setAction($this->generateUrl('admin_album_delete', ['id' => $album->getId()]))
+		return $this->_services->getFormFactory()
+					->createBuilder()
+					->setAction($this->_services->getRouter()->generate('admin_album_delete', ['id' => $album->getId()]))
 					->setMethod('DELETE')
 					->getForm();
 	}
@@ -194,21 +250,20 @@ class StoreController extends Controller {
 	 * @Method({"GET", "POST"})
 	 */
 	public function createAlbumAction(Request $request) {
-		$album = new Album;
+		$album = $this->albums->newEntity();
 		
-		$form = $this->createForm('AppBundle\Form\AlbumType', $album);
+		$form = $this->_services->getFormFactory()->create('AppBundle\Form\AlbumType', $album);
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-			$em = $this->getDoctrine()->getManager();
-			$em->persist($album);
-			$em->flush();
+			
+			$this->albums->save($album);			
 
-			$this->addFlash('success', 'Album created successfully.');
-			return $this->redirectToRoute('admin_album_index');
+			$this->_services->addFlash('success', 'Album created successfully.');
+			return new RedirectResponse($this->_services->getRouter()->generate('admin_album_index'));
 		}
 
-		return $this->render('admin/albums/new.html.twig', ['form' => $form->createView()]);
+		return $this->_services->getTemplating()->renderResponse('admin/albums/new.html.twig', ['form' => $form->createView()]);		
 
 	}
 
@@ -220,13 +275,13 @@ class StoreController extends Controller {
 		$editForm = $this->createForm('AppBundle\Form\AlbumType', $album);
 		$editForm->handleRequest($request);
 		if ($editForm->isSubmitted() && $editForm->isValid()) {
-			$em = $this->getDoctrine()->getManager();
-			$em->flush();
+			
+			$this->albums->save($album, false);
 
-			$this->addFlash("success", "Album #{$album->getId()} was updated.");
-			return $this->redirectToRoute('admin_album_index');
+			$this->_services->addFlash("success", "Album #{$album->getId()} was updated.");
+			return new RedirectResponse($this->_services->getRouter()->generate('admin_album_index'));
 		}
-		return $this->render('admin/albums/edit.html.twig', [
+		return $this->_services->getTemplating()->renderResponse('admin/albums/edit.html.twig', [
 				'album' => $album,
 				'edit_form' => $editForm->createView()
 			]);
@@ -241,13 +296,12 @@ class StoreController extends Controller {
 		$form = $this->createDeleteAlbumForm($album);
 		$form->handleRequest($request);
 		if ($form->isSubmitted() && $form->isValid()) {
-			$em = $this->getDoctrine()->getManager();
-			$em->remove($album);
-			$em->flush();
+			
+			$this->albums->delete($album);
 
-			$this->addFlash('success', 'Album was deleted.');
+			$this->_services->addFlash('success', 'Album was deleted.');
 		}
-		return $this->redirectToRoute('admin_album_index');
+		return new RedirectResponse($this->_services->getRouter()->generate('admin_album_index'));
 	}
 
 }

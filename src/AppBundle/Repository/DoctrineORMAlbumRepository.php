@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Album;
+
 /**
  * AlbumRepository
  *
@@ -42,5 +44,21 @@ class DoctrineORMAlbumRepository extends \Doctrine\ORM\EntityRepository implemen
 
 		return $this->find($id);
 
+	}
+
+	public function save(Album $album, $insert = true) {
+		if ($insert) {
+			$this->getEntityManager()->persist($album);	
+		}		
+		$this->getEntityManager()->flush();
+	}
+
+	public function delete(Album $album) {
+		$this->getEntityManager()->remove($album);
+		$this->getEntityManager()->flush();
+	}
+
+	public function newEntity() {
+		return new Album;
 	}
 }

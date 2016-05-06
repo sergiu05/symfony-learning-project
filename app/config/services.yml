@@ -29,17 +29,29 @@ services:
             - AppBundle\Entity\Album 
         autowiring_types: AppBundle\Repository\AlbumInterface
 
+    app.doctrine_user_repository:
+        class: Doctrine\ORM\EntityRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments:
+            - AppBundle\Entity\User 
+        autowiring_types: AppBundle\Repository\UserInterface
+
+    app.base_controller:
+        class: AppBundle\Controller\BaseController
+        calls:
+            - [ setTemplating, ['@templating']]
+            - [ setRouter, ['@router']]
+
     # define controller as a service
     app.store_controller:
         class: AppBundle\Controller\StoreController
         autowire: true
 
+    app.admin.store_controller:
+        class: AppBundle\Controller\Admin\StoreController 
+        autowire: true
+
     # services to be injected in the controllers defined as a service
     app.common_services:
         class: AppBundle\Services\CommonServices 
-        arguments: ['@templating', '@router']
-    
-    
-
-
-
+        arguments: ['@templating', '@router', '@form.factory', '@session']

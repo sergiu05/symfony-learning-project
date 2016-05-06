@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Genre;
+
 /**
  * DoctrineORMGenreRepository
  *
@@ -23,6 +25,22 @@ class DoctrineORMGenreRepository extends \Doctrine\ORM\EntityRepository implemen
 
 	public function all() {
 		return $this->findAll();
+	}
+
+	public function save(Genre $genre, $insert = true) {
+		if ($insert) {
+			$this->getEntityManager()->persist($genre);	
+		}		
+		$this->getEntityManager()->flush();
+	}
+
+	public function delete(Genre $genre) {
+		$this->getEntityManager()->remove($genre);
+		$this->getEntityManager()->flush();
+	}
+
+	public function newEntity() {
+		return new Genre;
 	}
 
 }

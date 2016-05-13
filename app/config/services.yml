@@ -65,3 +65,7 @@ services:
         autowire: true
         calls:
             - [ setRouter, ['@router']]
+
+    app.form_login_authenticator:
+        class: AppBundle\Security\FormLoginAuthenticator 
+        arguments: ['@security.password_encoder', '@router']

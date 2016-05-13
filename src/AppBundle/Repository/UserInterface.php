@@ -25,4 +25,10 @@ interface UserInterface {
 	 * @return void
 	 */
 	public function delete(User $user); 
+
+	/**
+	 * @param string $apiKey
+	 * @return User	 
+	 */
+	public function getByApiKey($apiKey);
 }

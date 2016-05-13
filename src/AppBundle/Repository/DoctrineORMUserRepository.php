@@ -31,4 +31,8 @@ class DoctrineORMUserRepository extends \Doctrine\ORM\EntityRepository implement
 		$this->getEntityManager()->remove($user);
 		$this->getEntityManager()->flush();
 	}
+
+	public function getByApiKey($apiKey) {
+		return $this->findOneBy(array('apiKey' => $apiKey));
+	}
 }

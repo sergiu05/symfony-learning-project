@@ -59,3 +59,9 @@ services:
     app.common_services:
         class: AppBundle\Services\CommonServices 
         arguments: ['@templating', '@router', '@form.factory', '@session']
+
+    app.token_authenticator:
+        class: AppBundle\Security\TokenAuthenticator 
+        autowire: true
+        calls:
+            - [ setRouter, ['@router']]

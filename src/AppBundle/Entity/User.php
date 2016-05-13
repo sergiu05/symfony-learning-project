@@ -72,6 +72,11 @@ class User implements UserInterface, \Serializable
     private $isActive;
 
     /**
+     * @ORM\Column(name="api_key", type="string", unique=true)
+     */
+    private $apiKey;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -349,6 +354,13 @@ class User implements UserInterface, \Serializable
     public function setPlainPassword($password)
     {
         $this->plainPassword = $password;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApiKey() {
+    	return $this->api_key;
     }
 
 

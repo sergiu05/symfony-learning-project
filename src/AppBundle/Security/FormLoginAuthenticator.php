@@ -6,12 +6,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+
+
+
 
 /**
  * The tradition form authentication done via Guard component
@@ -31,13 +37,19 @@ class FormLoginAuthenticator extends AbstractFormLoginAuthenticator {
 	private $urlGenerator;
 
 	/**
+	 * @var CsrfTokenManagerInterface 
+	 */
+	private $csrfTokenManager;
+
+	/**
 	 *
 	 * @param UserPasswordEncoderInterface $encoder
 	 * @param UrlGeneratorInterface $urlGenerator
 	 */
-	public function __construct(UserPasswordEncoderInterface $encoder, UrlGeneratorInterface $urlGenerator) {
+	public function __construct(UserPasswordEncoderInterface $encoder, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager) {
 		$this->encoder = $encoder;
 		$this->urlGenerator = $urlGenerator;
+		$this->csrfTokenManager = $csrfTokenManager;
 	}
 
 	/**
@@ -62,6 +74,10 @@ class FormLoginAuthenticator extends AbstractFormLoginAuthenticator {
 			return;
 		}
 
+		$csrfToken = $request->request->get('_csrf_token');
+		if (false === $this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
+			throw new InvalidCsrfTokenException('Invalid csrf token.');
+		}
 		$username = $request->request->get('_username');
 		$request->getSession()->set(Security::LAST_USERNAME, $username);
 		$password = $request->request->get('_password');

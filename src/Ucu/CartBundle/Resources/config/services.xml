@@ -11,6 +11,7 @@
         </service>
         <service id="ucu_cart.cart" class="Ucu\CartBundle\Cart\Cart">
         	<argument type="service" id="ucu_cart.session_storage" />
+            <argument type="service" id="event_dispatcher" />
         </service>
     </services>
     

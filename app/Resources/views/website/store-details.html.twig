@@ -50,9 +50,10 @@
                 </p>
             </div>
             <div class="button-wrapper">
-                <button id="addToCart" type="button" class="btn primary">
+                {% set csrfTokenValue = csrf_token('ajax') %}
+                <a id="addToCart" class="btn btn-primary" href="{{ path('add_to_cart', {'album_id': album.id, '_token': csrfTokenValue }) }}">
                     Add To Cart
-                </button>
+                </a>
             </div>
         </div>
 
@@ -62,4 +63,30 @@
 
 </div>
 
+{% endblock %}
+
+{% block custom_js %}
+<script>
+$('#addToCart').on('click', function(e) {
+    var $this = $(this);
+    if ($this.hasClass('disabled')) {
+        return;
+    }
+    $this.addClass('disabled');
+    $.ajax({
+        url: $this.attr('href'),        
+        method: 'POST'
+    })
+    .done(function(data) {
+        $('#items').html(data.total);
+    })
+    .fail(function() {
+        alert('error');
+    }).
+    always(function() {
+        $this.removeClass('disabled');
+    });
+    e.preventDefault();
+});
+</script>
 {% endblock %}

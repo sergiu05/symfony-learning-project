@@ -14,7 +14,9 @@ services:
     app.cart:
         class: AppBundle\Cart\Cart 
         arguments: ['@app.session_storage']
-
+    
+    
+    # define entity repositories as services in order to be injected into controllers
     app.doctrine_genre_repository:
         class: Doctrine\ORM\EntityRepository
         factory: ["@doctrine.orm.entity_manager", getRepository]
@@ -36,11 +38,6 @@ services:
             - AppBundle\Entity\User 
         autowiring_types: AppBundle\Repository\UserInterface
 
-    app.base_controller:
-        class: AppBundle\Controller\BaseController
-        calls:
-            - [ setTemplating, ['@templating']]
-            - [ setRouter, ['@router']]
 
     # define controller as a service
     app.store_controller:
@@ -54,12 +51,16 @@ services:
     app.shopping_controller:
         class: AppBundle\Controller\ShoppingController 
         autowire: true
+        calls:
+            - [ setContainer, ['@service_container']]
+        
         
     # services to be injected in the controllers defined as a service
     app.common_services:
         class: AppBundle\Services\CommonServices 
         arguments: ['@templating', '@router', '@form.factory', '@session']
-
+    
+    # authentication services
     app.token_authenticator:
         class: AppBundle\Security\TokenAuthenticator 
         autowire: true
@@ -68,4 +69,4 @@ services:
 
     app.form_login_authenticator:
         class: AppBundle\Security\FormLoginAuthenticator 
-        arguments: ['@security.password_encoder', '@router']
+        arguments: ['@security.password_encoder', '@router', '@security.csrf.token_manager']

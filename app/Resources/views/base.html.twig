@@ -51,6 +51,14 @@
 	              			</li>
 	            		</ul>
 	            		<ul class="nav navbar-nav navbar-right">
+                            <li>                       
+                                <a class="btn" href="/">
+                                    <i class="fa fa-shopping-cart" aria-hidden="true"></i> 
+                                    <span id="items" class="items">
+                                        {{ render(controller('app.shopping_controller:getCountAction')) }}
+                                    </span>
+                                </a>  
+                            </li>
 	            			{% if app.user %}
 	            				<li><a href="{{ path('security_logout') }}">Logout</a></li>
 	            			{% else %}

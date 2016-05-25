@@ -407,4 +407,17 @@ class Album implements EntityInterface
     	return (0 === count($this->getOrderdetails()));
     }
 
+    /**
+     * @return array
+     */
+    public function toArray() {
+    	return [
+    		'id' => $this->getId(),
+    		'title' => $this->getTitle(),
+    		'price' => $this->getPrice(),
+    		'description' => $this->getDescription(),
+    	];
+    }
+
+
 }

@@ -38,6 +38,13 @@ services:
             - AppBundle\Entity\User 
         autowiring_types: AppBundle\Repository\UserInterface
 
+    app.doctrine_order_repository:
+        class: Doctrine\ORM\EntityRepository
+        factory: ["@doctrine.orm.entity_manager", getRepository]
+        arguments:
+            - AppBundle\Entity\Order 
+        autowiring_types: AppBundle\Repository\OrderInterface    
+
 
     # define controller as a service
     app.store_controller:

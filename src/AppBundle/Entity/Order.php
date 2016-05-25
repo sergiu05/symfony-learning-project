@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Orders
  *
  * @ORM\Table(name="orders")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\OrdersRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\DoctrineORMOrderRepository")
  * @ORM\HasLifecycleCallbacks
  */
 class Order
@@ -70,7 +70,7 @@ class Order
     }
 
     /**
-     * Set total
+     * Set total in cents
      *
      * @param integer $total
      *
@@ -78,7 +78,7 @@ class Order
      */
     public function setTotal($total)
     {
-        $this->total = $total;
+        $this->total = $total * 100; /* store cost in cents */
 
         return $this;
     }
@@ -90,7 +90,7 @@ class Order
      */
     public function getTotal()
     {
-        return $this->total;
+        return round($this->total/100, 2);
     }
 
     /**

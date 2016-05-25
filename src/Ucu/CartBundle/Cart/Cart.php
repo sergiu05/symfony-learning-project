@@ -5,6 +5,8 @@ namespace Ucu\CartBundle\Cart;
 use Ucu\CartBundle\Storage\StorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Ucu\CartBundle\Event\Events;
+use Ucu\CartBundle\Event\CartItemEvent;
+use Ucu\CartBundle\Event\CartItemsEvent;
 
 class Cart implements CartInterface {
 
@@ -34,10 +36,29 @@ class Cart implements CartInterface {
 		$this->dispatcher = $dispatcher;
 	}
 	
+	/**
+	 * @return array Array of CartItem instances
+	 */
 	public function getCartItems() {	
 		return $this->storage->get(self::CART, []);
 	}
 
+	/**
+	 * @return array Cart content as array of arrays
+	 */
+	public function getCartItemsAsArray() {
+		$items = $this->getCartItems();
+ 		array_walk($items, function(&$item, $key) { 			
+ 			$item = array('qty' => $item->getQuantity(), 'entity' => $item->getEntity()->toArray()); 			
+ 		});
+ 		return $items;
+	}
+
+	/**
+	 * @param EntityInterface #entity
+	 * @param int $qty
+	 * @param boolean $add optional 
+	 */
 	public function updateCart(EntityInterface $entity, $qty = 1, $add = true) {
 		
 		$items = $this->getCartItems();
@@ -101,7 +122,7 @@ class Cart implements CartInterface {
 		$items = $this->getCartItems();
 
 		# dispatch event Events::REMOVE_BEFORE 
-		$event = new CartItemEvent($items[$id]);
+		$event = new CartItemEvent($items[$id]->getEntity());
 		$this->dispatcher->dispatch(Events::REMOVE_BEFORE, $event);
 		if ($event->isPropagationStopped()) {
 			return;
@@ -114,18 +135,24 @@ class Cart implements CartInterface {
 		$this->dispatcher->dispatch(Events::REMOVE_AFTER, $event);
 	}
 
-	
+	/**
+	 * Count items from the cart
+	 *
+	 * @return int
+	 */
 	public function getCount() {
 		$count = 0;
 
 		foreach($this->getCartItems() as $item) {
-
+			$count += $item->getQuantity();
 		}
 
 		return $count;
 	}
 
-
+	/**
+	 * Destroy the cart
+	 */
 	public function emptyCart() {
 
 		# dispatch event Events::CLEAR_BEFORE 

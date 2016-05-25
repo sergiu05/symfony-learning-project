@@ -20,6 +20,7 @@ class AppKernel extends Kernel
             new Bmatzner\FontAwesomeBundle\BmatznerFontAwesomeBundle(),
             new Knp\Bundle\MenuBundle\KnpMenuBundle(),
             new Ucu\CartBundle\UcuCartBundle(),
+            new FOS\JsRoutingBundle\FOSJsRoutingBundle()
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

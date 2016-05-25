@@ -75,7 +75,8 @@ $('#addToCart').on('click', function(e) {
     $this.addClass('disabled');
     $.ajax({
         url: $this.attr('href'),        
-        method: 'POST'
+        method: 'POST',
+        dataType: 'json'
     })
     .done(function(data) {
         $('#items').html(data.total);

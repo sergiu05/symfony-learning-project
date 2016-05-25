@@ -52,7 +52,7 @@
 	            		</ul>
 	            		<ul class="nav navbar-nav navbar-right">
                             <li>                       
-                                <a class="btn" href="/">
+                                <a class="btn" href="{{ path('app.checkout') }}">
                                     <i class="fa fa-shopping-cart" aria-hidden="true"></i> 
                                     <span id="items" class="items">
                                         {{ render(controller('app.shopping_controller:getCountAction')) }}
@@ -75,9 +75,12 @@
         {% block javascripts %}
         	{% javascripts 
         		'@AppBundle/Resources/public/js/jquery-2.2.3.min.js' 
-        		'@AppBundle/Resources/public/js/bootstrap.min.js' %}
+        		'@AppBundle/Resources/public/js/bootstrap.min.js' 
+        		'@AppBundle/Resources/public/js/sweetalert.min.js' %}
         		<script src="{{ asset_url }}"></script>
         	{% endjavascripts %}
+        	<script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+			<script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
         {% endblock %}
         {% block custom_js %}{% endblock %}
     </body>

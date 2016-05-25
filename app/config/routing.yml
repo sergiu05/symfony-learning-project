@@ -5,3 +5,6 @@ app:
 ucu_cart:
     resource: "@UcuCartBundle/Resources/config/routing.xml"
     prefix:   /
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"

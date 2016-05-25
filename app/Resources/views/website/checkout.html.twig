@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Checkout' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+<style>
+body {
+    padding-top: 150px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+}
+table .media > .thumbnail { margin-bottom: 0px; padding: 4px; margin-right: 4px; }
+table th:last-child { min-width: 190px; }
+</style>
+{% endblock %}	
+
+{% block body_class 'checkout' %}
+
+{% block body %}
+
+<div class="row">
+
+	<div class="col-sm-12 col-md-8 col-md-offset-2">
+	    <table class="table table-hover">
+	        <thead>
+	            <tr>
+	                <th>Product</th>
+	                <th>Quantity</th>
+	                <th class="text-center">Price</th>
+	                <th class="text-center">Total</th>
+	                <th> </th>
+	            </tr>
+	        </thead>
+	        <tbody>
+	        	{% if cartItems|length %}
+
+	        	{% for item in cartItems %}
+	            <tr>
+	                <td class="col-sm-8 col-md-6">
+	                <div class="media">
+	                    <a class="thumbnail pull-left" href="#"> <img class="media-object" src="{{ asset(item.entity.getWebPath()) }}" style="width: 72px; height: 72px;"> </a>
+	                    <div class="media-body">
+	                        <h4 class="media-heading"><a href="{{ path('album_details', {'album_id': item.entity.id}) }}">{{ item.entity.title }}</a></h4>
+	                        <h5 class="media-heading"> by <a href="#">{{ item.entity.artist.name}}</a></h5>
+	                        <span>Status: </span><span class="text-success"><strong>In Stock</strong></span>
+	                    </div>
+	                </div></td>
+	                <td class="col-sm-1 col-md-1" style="text-align: center">
+	                <input type="text" class="form-control" id="item-{{ item.entity.id }}" value="{{ item.getQuantity() }}">
+	                </td>
+	                <td class="col-sm-1 col-md-1 text-center"><strong>${{ item.entity.price }}</strong></td>
+	                <td class="col-sm-1 col-md-1 text-center"><strong>${{ item.entity.price * item.getQuantity() }}</strong></td>
+	                <td class="col-sm-1 col-md-1 text-center">
+	                		                	
+	                	<button type="button" class="btn btn-danger btn-sm remove-button" data-id="{{ item.entity.id }}">
+	                    	<i class="fa fa-times" aria-hidden="true"></i> Remove
+	                	</button>
+	                	<button type="button" class="btn btn-info btn-sm update-button" data-id="{{ item.entity.id }}">
+		                    <i class="fa fa-refresh" aria-hidden="true"></i> Update
+		                </button>
+	                </td>
+	            </tr>
+	            {% endfor %}	           
+	            
+	            <tr>
+	                <td>   </td>
+	                <td>   </td>
+	                <td>   </td>
+	                <td><h3>Total</h3></td>
+	                <td class="text-right"><h3><strong>${{ cartTotal }}</strong></h3></td>
+	            </tr>
+	            <tr>
+	                <td>   </td>
+	                <td>   </td>
+	                <td>   </td>
+	                <td>
+	                <a href="{{ path('store') }}" class="btn btn-default">
+	                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>  Continue Shopping
+	                </a></td>
+	                <td>
+	                <a href="{{ path('app.process') }}" class="btn btn-success place-order-button">
+	                    Place order <i class="fa fa-check" aria-hidden="true"></i>
+	                </a></td>
+	            </tr>
+	            {% else %}
+	            <tr>
+	            	<td colspan="3">The shopping cart is empty.</td>
+	            	<td colspan="2"><a href="{{ path('store') }}" class="btn btn-default">
+	                    <i class="fa fa-shopping-cart" aria-hidden="true"></i> Continue Shopping
+	                </button></td>
+	            </tr>
+	            {% endif %}
+	        </tbody>
+	    </table>
+	    <input type="hidden" name="_token" value="{{ csrf_token('ajax') }}">
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+
+	$('.table').on('click', 'button', function(event) {
+		var $this = $(this),
+			csrfValue = $('input[name="_token"]').val();			
+
+		if ($this.hasClass('remove-button')) {			
+			
+			$.ajax({
+				type: 'post',
+				url: Routing.generate('app.remove_from_cart', {'album_id': $this.data('id'), '_token': csrfValue}),				
+				dataType: "json"
+			}).done(function(json) {
+				$('#items').html(json.count);
+        		swal({
+        			title: 'Info',
+        			text: 'You have removed the product from the cart',
+        			type: 'success'
+        		}, function() {        			
+        			location.reload(true);
+        		});        		
+			}).fail(function() {
+				swal('Error', 'Unexpected error', 'error');        
+			});
+
+		} else if ($this.hasClass('update-button')) {
+					
+			$.ajax({
+				type: 'post',
+				url: Routing.generate('app.update_cart', {'album_id': $this.data('id'), '_token': csrfValue, 'qty': $('#item-' + $this.data('id')).val()}),				
+				dataType: "json"
+			}).done(function(json) {
+				$('#items').html(json.count);
+        		swal({
+        			title: 'Info',
+        			text: 'You have updated the product from the cart',
+        			type: 'success'
+        		}, function() {
+        			location.reload(true);
+        		});
+			}).fail(function() {
+				swal('Error', 'Unexpected error', 'error');        
+			});
+			
+		} 
+	});
+</script>
+{% endblock %}

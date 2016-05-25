@@ -98,7 +98,7 @@ class Orderdetail
     }
 
     /**
-     * Set price
+     * Set price in cents
      *
      * @param integer $price
      *
@@ -106,7 +106,7 @@ class Orderdetail
      */
     public function setPrice($price)
     {
-        $this->price = $price;
+        $this->price = $price * 100;
 
         return $this;
     }
@@ -118,7 +118,7 @@ class Orderdetail
      */
     public function getPrice()
     {
-        return $this->price;
+        return round($this->price/100, 2);
     }
 
     /**
@@ -128,8 +128,8 @@ class Orderdetail
      */
     public function setCreatedAt()
     {
-        $this->created_at = new \DateTime("now");
-    	$this->updated_at = $this->created_at;
+        $this->createdAt = new \DateTime("now");
+    	$this->updatedAt = $this->createdAt;
     }
 
     /**

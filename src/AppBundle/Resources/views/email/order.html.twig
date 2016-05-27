@@ -1,0 +1,10 @@
+{# src/AppBundle/Resources/views/email/order.html.twig #}
+
+{% block body_text %}
+    Total order value:
+    {{ total }}    
+{% endblock %}
+ 
+{% block body_html %}
+    <p>Total order value: <b>{{ total }}</b></p>
+{% endblock %}

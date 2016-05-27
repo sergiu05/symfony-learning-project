@@ -18,6 +18,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Controller as service
@@ -37,13 +38,19 @@ class ShoppingController implements ContainerAwareInterface {
 	protected $orders;
 
 	/**
+	 * @var EventDispatcherInterface 
+	 */
+	protected $dispatcher;
+
+	/**
      * @var ContainerInterface
      */
     protected $container;    
 
-	public function __construct(AlbumInterface $albums, OrderInterface $orders) {
+	public function __construct(AlbumInterface $albums, OrderInterface $orders, EventDispatcherInterface $dispatcher) {
 		$this->albums = $albums;
 		$this->orders = $orders;
+		$this->dispatcher = $dispatcher;
 	}
 
 	/**
@@ -217,15 +224,19 @@ class ShoppingController implements ContainerAwareInterface {
 	 * @Method("GET")
 	 */
 	public function processOrderAction(Request $request) {		
+		$user = $this->container->get('security.token_storage')->getToken()->getUser();		
 
-		$user = $this->container->get('security.token_storage')->getToken()->getUser();
+		$items = $this->container->get('ucu_cart.cart')->getCartItemsAsArray();
+		$totalValue =  $this->container->get('ucu_cart.cart')->getTotalValue();
 
-		if ($this->orders->process(
-				$this->container->get('ucu_cart.cart')->getCartItemsAsArray(),
-				$this->container->get('ucu_cart.cart')->getTotalValue(),
-				$user
-			)) {
+		if ($this->orders->process($items, $totalValue, $user)) {
+
+			# create and dispatch the PlacedOrderEvent
+			$event = new \AppBundle\Event\PlacedOrderEvent($items, $totalValue, $user);
+			$this->dispatcher->dispatch(\AppBundle\Event\AppEvents::PROCESSED_CART, $event);
+
 			$this->container->get('ucu_cart.cart')->emptyCart();
+
 			return $this->container->get('templating')->renderResponse('website/process_ok.html.twig');
 		}
 		

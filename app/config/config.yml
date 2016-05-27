@@ -65,7 +65,7 @@ swiftmailer:
     host:      "%mailer_host%"
     username:  "%mailer_user%"
     password:  "%mailer_password%"
-    spool:     { type: memory }
+    #spool:     { type: memory }
 
 
 assetic:
@@ -75,6 +75,17 @@ assetic:
     filters:
         cssrewrite: ~
 
-ucu_cart:
-    session_key: second_cart
+ucu_mail:
+    subject: Mail from us 
+    replyTo: mail@example.com
+    from:
+        email: mail@example.com
+        name: Spiderman vs Batman   
+    cc:
+        email: cc-mail@example.com
+        name: theCC
+    to:
+        email: to-mail@example.com
+        name: theTo
+
         

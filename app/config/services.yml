@@ -43,8 +43,7 @@ services:
         factory: ["@doctrine.orm.entity_manager", getRepository]
         arguments:
             - AppBundle\Entity\Order 
-        autowiring_types: AppBundle\Repository\OrderInterface    
-
+        autowiring_types: AppBundle\Repository\OrderInterface
 
     # define controller as a service
     app.store_controller:
@@ -57,7 +56,7 @@ services:
 
     app.shopping_controller:
         class: AppBundle\Controller\ShoppingController 
-        autowire: true
+        arguments: ["@app.doctrine_album_repository", "@app.doctrine_order_repository", "@event_dispatcher"]
         calls:
             - [ setContainer, ['@service_container']]
         
@@ -77,3 +76,10 @@ services:
     app.form_login_authenticator:
         class: AppBundle\Security\FormLoginAuthenticator 
         arguments: ['@security.password_encoder', '@router', '@security.csrf.token_manager']
+
+    # register the event subscriber
+    app.processed_cart_subscriber:
+        class: AppBundle\Event\Listener\PlaceOrderListener
+        arguments: ['@ucu_mail.mail_manager']
+        tags:
+            - { name: kernel.event_subscriber }

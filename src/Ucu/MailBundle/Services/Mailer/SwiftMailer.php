@@ -21,6 +21,10 @@ class SwiftMailer implements MailerInterface {
 	/**
 	 * @param stdClass $templates
 	 * @param array $settings
+	 *
+	 * @return boolean
+	 *
+	 * @throws Exception
 	 */
 	public function send(\stdClass $templates, array $settings) {
 		
@@ -37,7 +41,7 @@ class SwiftMailer implements MailerInterface {
 			$response = $this->mailer->send($swift_message);	
 
 		} catch (\Exception $e) {
-			return false;
+			throw $e;
 		}
 
 		return (bool) $response;

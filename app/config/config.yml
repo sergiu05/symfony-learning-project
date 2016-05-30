@@ -70,10 +70,11 @@ swiftmailer:
 
 assetic:
     debug:            '%kernel.debug%'
-    use_controller:   '%kernel.debug%'
+    use_controller:   true
     write_to: %kernel.root_dir%/../web    
     filters:
         cssrewrite: ~
+
 
 ucu_mail:
     subject: Mail from us 

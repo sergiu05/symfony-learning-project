@@ -30,6 +30,6 @@ class PlaceOrderListener implements EventSubscriberInterface {
 		$user = $event->getUser();
 		$total = $event->getTotal();
 
-		$this->mailManager->send('AppBundle:email:order.html.twig', ['to' => ['email' => 'i@example.it', 'name' => 'Y2K'], 'total' => $total]);
+		$this->mailManager->send('AppBundle:email:order.html.twig', ['to' => ['email' => $user->getEmail(), 'name' => $user->getUsername()], 'total' => $total]);
 	}
 }

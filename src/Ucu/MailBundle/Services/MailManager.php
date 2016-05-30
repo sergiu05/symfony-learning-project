@@ -41,6 +41,7 @@ class MailManager implements MailManagerInterface {
 	 * @param MailerInterface $mailer	 
 	 * @param EngineInterface $templating
 	 * @param LoggerInterface $logger
+	 * @param array $defaults -> parameters defined by config.yml via extension class
 	 */
 	public function __construct(MailerInterface $mailer, ProviderInterface $templating, LoggerInterface $logger, array $defaults = []) {		
 		$this->mailer 		= $mailer;
@@ -61,7 +62,18 @@ class MailManager implements MailManagerInterface {
 		# merge default settings provided via config.yml with $parameters
 		$settings = array_intersect_key($parameters + $this->defaults, $this->defaults);
 		
-		return $this->mailer->send($templates, $settings);
+		try {
+			$response = $this->mailer->send($templates, $settings);
+			return $response;
+		} catch (\Exception $e) {
+			$this->logger->critical(
+				sprintf(
+						'Failed to send email with message: %s',						
+						$e->getMessage()
+					), $settings
+			);
+		}
+		
 	}
 	
 

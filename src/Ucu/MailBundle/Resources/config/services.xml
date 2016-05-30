@@ -27,7 +27,14 @@
         	<argument type="service" id="ucu_mail.provider" />
         	<argument type="service" id="logger" />
         	<argument />
+        	<tag name="monolog.logger" channel="mailmanager" />
         </service>
+
+        <service id="ucu_mail.monolog.processor" class="Monolog\Processor\IntrospectionProcessor">
+        	<tag name="monolog.processor" channel="mailmanager" />
+        </service>
+
+
     </services>
     
 </container>

@@ -13,6 +13,11 @@ web_profiler:
 
 monolog:
     handlers:
+        applog: 
+            type: stream
+            path: "%kernel.logs_dir%/email.log"
+            level: error
+            channels: mailmanager
         main:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
@@ -32,3 +37,12 @@ monolog:
 
 #swiftmailer:
 #    delivery_address: me@example.com
+
+swiftmailer:
+    #spool:     { type: memory }
+    transport: smtp
+    host:      mailtrap.io
+    username:  3c373c85972d4b
+    password:  4fe8e522f6095b
+    auth_mode: cram-md5
+    port: 2525
